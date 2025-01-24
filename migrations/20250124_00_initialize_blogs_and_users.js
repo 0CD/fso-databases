@@ -1,5 +1,4 @@
 const { DataTypes } = require('sequelize')
-const { max } = require('../models/blog')
 
 module.exports = {
     up: async ({ context: queryInterface }) => {
