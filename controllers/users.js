@@ -8,7 +8,7 @@ router.get('/', async (req, res) => {
     const users = await User.findAll({
         include: {
             model: Blog,
-            attributes: { exclude: ['userId'] }
+            attributes: { exclude: ['userId', 'createdAt', 'updatedAt'] }
         }
     })
     res.json(users)
@@ -31,7 +31,27 @@ router.post('/', async (req, res) => {
 })
 
 router.get('/:id', async (req, res) => {
-    const user = await User.findByPk(req.params.id)
+    const where = {}
+
+    if (req.query.read === 'true') {
+        where.read = true
+    } else if (req.query.read === 'false') {
+        where.read = false
+    }
+
+    const user = await User.findByPk(req.params.id, {
+        attributes: ['username', 'name'],
+        include: {
+            model: Blog,
+            as: 'readings',
+            attributes: { exclude: ['userId', 'createdAt', 'updatedAt'] },
+            through: {
+                attributes: ['id', 'read'],
+                as: 'readingLists',
+                where
+            }
+        }
+    })
     if (user) {
         res.json(user)
     } else {

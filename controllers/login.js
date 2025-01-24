@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt')
 const router = require('express').Router()
 
 const { SECRET } = require('../utils/config')
-const User = require('../models/user')
+const { User, Session } = require('../models')
 
 router.post('/', async (request, response) => {
     const { username, password } = request.body
@@ -37,6 +37,9 @@ router.post('/', async (request, response) => {
     }
 
     const token = jwt.sign(userForToken, SECRET)
+
+    await Session.destroy({ where: { userId: user.id } })
+    await Session.create({ token, userId: user.id })
 
     response
         .status(200)
