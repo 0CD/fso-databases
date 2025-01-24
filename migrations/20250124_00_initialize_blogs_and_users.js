@@ -69,13 +69,6 @@ module.exports = {
             allowNull: false,
             references: { model: 'users', key: 'id' },
         })
-        await queryInterface.addColumn('blogs', 'year', {
-            type: DataTypes.INTEGER,
-            validate: {
-                min: 1991,
-                max: new Date().getFullYear()
-            }
-        })
     },
     down: async ({ context: queryInterface }) => {
         await queryInterface.dropTable('blogs')
