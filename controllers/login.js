@@ -10,7 +10,7 @@ router.post('/', async (request, response) => {
 
     const user = await User.findOne({
         where: {
-            username: username
+            username: username.toLowerCase()
         }
     })
 
@@ -21,7 +21,13 @@ router.post('/', async (request, response) => {
 
     if (!(user && passwordCorrect)) {
         return response.status(401).json({
-            error: 'invalid username or password'
+            error: 'Invalid username or password'
+        })
+    }
+
+    if (user.disabled) {
+        return response.status(401).json({
+            error: 'Account disabled, please contact admin'
         })
     }
 

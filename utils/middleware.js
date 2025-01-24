@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 
 const { SECRET } = require('../utils/config')
+const { User } = require('../models')
 
 const errorHandler = (error, request, response, next) => {
     console.error('Error:', error.message)
@@ -32,4 +33,12 @@ const tokenExtractor = (req, res, next) => {
     next()
 }
 
-module.exports = { errorHandler, tokenExtractor }
+const isAdmin = async (req, res, next) => {
+    const user = await User.findByPk(req.decodedToken.id)
+    if (!user.admin) {
+        return res.status(401).json({ error: 'Operation not allowed' })
+    }
+    next()
+}
+
+module.exports = { errorHandler, tokenExtractor, isAdmin }

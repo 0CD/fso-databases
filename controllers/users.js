@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt')
 const router = require('express').Router()
 
 const { User, Blog } = require('../models')
+const { tokenExtractor, isAdmin } = require('../utils/middleware')
 
 router.get('/', async (req, res) => {
     const users = await User.findAll({
@@ -20,7 +21,7 @@ router.post('/', async (req, res) => {
     const passwordHash = await bcrypt.hash(password, saltRounds)
 
     const user = new User({
-        username,
+        username: username.toLowerCase(),
         name,
         passwordHash
     })
@@ -38,7 +39,7 @@ router.get('/:id', async (req, res) => {
     }
 })
 
-router.put('/:username', async (req, res) => {
+router.put('/:username', tokenExtractor, isAdmin, async (req, res) => {
     const user = await User.findOne({
         where: {
             username: req.params.username
@@ -54,6 +55,9 @@ router.put('/:username', async (req, res) => {
         }
         if (req.body.name) {
             user.name = req.body.name
+        }
+        if (req.body.disabled) {
+            user.disabled = req.body.disabled
         }
         await user.save()
         res.json(user)
